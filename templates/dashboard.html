@@ -1,0 +1,113 @@
+<!-- Dashboard Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS - Farmer Dashboard</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card p-4 shadow-sm text-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                        <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+                    </div>
+                </div>
+                <div class="flex-grow-1 text-center">
+                    <h2>Farmer Dashboard</h2>
+                    <p class="lead">Welcome, {{ user.username }}!</p>
+                </div>
+                <div>
+                    <a href="/" class="btn btn-secondary">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Soil Input Form -->
+        <div class="card p-4 mt-4 shadow-sm">
+            <h3>Enter Soil Data</h3>
+            <form id="soil-form">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="nitrogen" class="form-label">Nitrogen (mg/kg)</label>
+                        <input type="number" class="form-control" id="nitrogen" step="0.1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="phosphorus" class="form-label">Phosphorus (mg/kg)</label>
+                        <input type="number" class="form-control" id="phosphorus" step="0.1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="potassium" class="form-label">Potassium (mg/kg)</label>
+                        <input type="number" class="form-control" id="potassium" step="0.1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="temperature" class="form-label">Temperature (°C)</label>
+                        <input type="number" class="form-control" id="temperature" step="0.1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="humidity" class="form-label">Humidity (%)</label>
+                        <input type="number" class="form-control" id="humidity" step="0.1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="ph" class="form-label">pH</label>
+                        <input type="number" class="form-control" id="ph" step="0.1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="rainfall" class="form-label">Rainfall (mm)</label>
+                        <input type="number" class="form-control" id="rainfall" step="0.1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="moisture" class="form-label">Moisture (%)</label>
+                        <input type="number" class="form-control" id="moisture" step="0.1">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="soil_type" class="form-label">Soil Type</label>
+                        <select class="form-control" id="soil_type">
+                            <option value="">Select</option>
+                            <option value="Clay">Clay</option>
+                            <option value="Loamy">Loamy</option>
+                            <option value="Red">Red</option>
+                            <option value="Black">Black</option>
+                            <option value="Sandy">Sandy</option>
+                            <option value="Saline">Saline</option>
+                            <option value="Silt">Silt</option>
+                            <option value="Chalky">Chalky</option>
+                            <option value="Peaty">Peaty</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="button" class="btn btn-primary" id="crop-recommend-btn">Get Crop Recommendation</button>
+                    <button type="button" class="btn btn-success ms-2" id="fertilizer-recommend-btn" disabled>Get Fertilizer Recommendation</button>
+                    <a href="/api/export-data" class="btn btn-info ms-2">Export Data</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card p-4 mt-4 shadow-sm">
+            <h3>Recommendations</h3>
+            <p id="crop-result" class="lead"></p>
+            <p id="fertilizer-result" class="lead"></p>
+        </div>
+
+        <!-- Chart for Soil Nutrients -->
+        <div class="card p-4 mt-4 shadow-sm">
+            <h3>Soil Nutrient Levels</h3>
+            <div class="chart-container">
+                <canvas id="nutrientChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/soil.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

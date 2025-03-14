@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS - Admin Dashboard</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card p-4 shadow-sm text-center">
+            <h2>Admin Dashboard</h2>
+            <p class="lead">Welcome, {{ admin.username }}!</p>
+            <button class="btn btn-info mt-3" id="viewAllDataBtn">View All Soil & Recommendation Data</button>
+        </div>
+
+        <!-- Farmers Table -->
+        <div class="card p-4 mt-4 shadow-sm">
+            <h3>Manage Farmers</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Approved</th>
+                        <th>Suspended</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for farmer in farmers %}
+                    <tr>
+                        <td>{{ farmer.id }}</td>
+                        <td>{{ farmer.username }}</td>
+                        <td>{{ farmer.email }}</td>
+                        <td>{{ 'Yes' if farmer.is_approved else 'No' }}</td>
+                        <td>{{ 'Yes' if farmer.is_suspended else 'No' }}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm approve-btn" data-id="{{ farmer.id }}" data-action="approve" {% if farmer.is_approved %}disabled{% endif %}>Approve</button>
+                            <button class="btn btn-warning btn-sm reject-btn" data-id="{{ farmer.id }}" data-action="reject" {% if not farmer.is_approved %}disabled{% endif %}>Reject</button>
+                            <button class="btn btn-info btn-sm suspend-btn" data-id="{{ farmer.id }}" data-action="suspend" {% if farmer.is_suspended %}disabled{% endif %}>Suspend</button>
+                            <button class="btn btn-info btn-sm unsuspend-btn" data-id="{{ farmer.id }}" data-action="unsuspend" {% if not farmer.is_suspended %}disabled{% endif %}>Unsuspend</button>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="{{ farmer.id }}" data-action="delete">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for All Data -->
+    <div class="modal fade" id="allDataModal" tabindex="-1" aria-labelledby="allDataModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="allDataModalLabel">All Soil & Recommendation Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped" id="allDataTable">
+                        <thead>
+                            <tr>
+                                <th>Farmer ID</th>
+                                <th>Date</th>
+                                <th>Nitrogen</th>
+                                <th>Phosphorus</th>
+                                <th>Potassium</th>
+                                <th>Temperature</th>
+                                <th>Humidity</th>
+                                <th>pH</th>
+                                <th>Rainfall</th>
+                                <th>Moisture</th>
+                                <th>Soil Type</th>
+                                <th>Crop</th>
+                                <th>Fertilizer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allDataTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="/" class="btn btn-secondary">Logout</a>
+    </div>
+    <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>
