@@ -444,43 +444,86 @@ def export_data():
         return jsonify({'error': 'Invalid token'}), 401
 
     user_id = data['user_id']
-    history = get_paired_history(user_id)
+    soil_history = get_paired_history(user_id)
+    
+    # Get farming data
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'error': 'Database connection failed'}), 500
 
-    # Create CSV in memory
-    output = StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['Date', 'Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 
-                    'Humidity', 'pH', 'Rainfall', 'Moisture', 'Soil Type',
-                    'Recommended Crop', 'Recommended Fertilizer'])
+    try:
+        cursor = connection.cursor(dictionary=True)
+        farming_query = """
+            SELECT year, crop, fertilizer, output 
+            FROM farming_data 
+            WHERE farmer_id = %s 
+            ORDER BY year DESC
+        """
+        cursor.execute(farming_query, (user_id,))
+        farming_history = cursor.fetchall()
 
-    for record in history:
-        writer.writerow([
-            record['date'],
-            record['nitrogen'],
-            record['phosphorus'],
-            record['potassium'],
-            record['temperature'],
-            record['humidity'],
-            record['ph'],
-            record['rainfall'],
-            record['moisture'],
-            record['soil_type'],
-            record['crop'],
-            record['fertilizer']
-        ])
+        # Create Excel-like CSV with multiple tables
+        output = StringIO()
+        writer = csv.writer(output)
+        
+        # Write Soil Data table
+        writer.writerow(['SOIL AND RECOMMENDATION DATA'])
+        writer.writerow(['Date', 'Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 
+                        'Humidity', 'pH', 'Rainfall', 'Moisture', 'Soil Type',
+                        'Recommended Crop', 'Recommended Fertilizer'])
 
-    # Convert to bytes for file download
-    output.seek(0)
-    binary_output = BytesIO()
-    binary_output.write(output.getvalue().encode('utf-8-sig'))  # UTF-8 with BOM for Excel
-    binary_output.seek(0)
+        for record in soil_history:
+            writer.writerow([
+                record['date'],
+                record['nitrogen'],
+                record['phosphorus'],
+                record['potassium'],
+                record['temperature'],
+                record['humidity'],
+                record['ph'],
+                record['rainfall'],
+                record['moisture'],
+                record['soil_type'],
+                record['crop'],
+                record['fertilizer']
+            ])
 
-    return send_file(
-        binary_output,
-        mimetype='text/csv',
-        download_name=f'farming_history_{user_id}.csv',  # Changed from attachment_filename
-        as_attachment=True
-    )
+        # Add space between tables
+        writer.writerow([])
+        writer.writerow([])
+
+        # Write Farming Data table
+        writer.writerow(['FARMING OUTPUT DATA'])
+        writer.writerow(['Year', 'Crop', 'Fertilizer Used', 'Output (kg)'])
+
+        for record in farming_history:
+            writer.writerow([
+                record['year'],
+                record['crop'],
+                record['fertilizer'],
+                record['output']
+            ])
+
+        # Convert to bytes for file download
+        output.seek(0)
+        binary_output = BytesIO()
+        binary_output.write(output.getvalue().encode('utf-8-sig'))
+        binary_output.seek(0)
+
+        return send_file(
+            binary_output,
+            mimetype='text/csv',
+            download_name=f'farming_history_{user_id}.csv',
+            as_attachment=True
+        )
+
+    except Exception as e:
+        print(f"Error exporting data: {e}")
+        return jsonify({'error': 'Failed to export data'}), 500
+    finally:
+        if connection:
+            cursor.close()
+            close_db_connection(connection)
 
 @app.route('/api/save-farming-data', methods=['POST'])
 def save_farming_data():

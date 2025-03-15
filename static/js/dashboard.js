@@ -562,22 +562,33 @@ function renderFarmingDataChart(data) {
 
 // Ensure DOM elements are loaded before adding event listeners
 document.addEventListener("DOMContentLoaded", function () {
+    // Remove any existing event listeners first
     const cropButton = document.getElementById("crop-recommend-btn");
     const fertilizerButton = document.getElementById("fertilizer-recommend-btn");
 
     if (cropButton) {
-        cropButton.addEventListener("click", getCropRecommendation);
+        // Remove existing listeners before adding new one
+        const newCropButton = cropButton.cloneNode(true);
+        cropButton.parentNode.replaceChild(newCropButton, cropButton);
+        newCropButton.addEventListener("click", getCropRecommendation, { once: true });
     } else {
         console.error("Crop Recommendation button not found.");
     }
 
     if (fertilizerButton) {
-        fertilizerButton.addEventListener("click", getFertilizerRecommendation);
+        // Remove existing listeners before adding new one
+        const newFertilizerButton = fertilizerButton.cloneNode(true);
+        fertilizerButton.parentNode.replaceChild(newFertilizerButton, fertilizerButton);
+        newFertilizerButton.addEventListener("click", getFertilizerRecommendation, { once: true });
     } else {
         console.error("Fertilizer Recommendation button not found.");
     }
 
-    fetchFarmingData();
+    // Only fetch farming data once
+    if (!window.farmingDataFetched) {
+        fetchFarmingData();
+        window.farmingDataFetched = true;
+    }
 });
 
 function cleanupModal() {
@@ -596,3 +607,24 @@ function cleanupModal() {
         document.documentElement.style.overflow = 'auto';
     }, 100);
 }
+
+// Add this after your existing modal initialization code
+
+document.getElementById('farmingDataModal').addEventListener('hidden.bs.modal', function () {
+    // Remove modal backdrop
+    const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+    modalBackdrops.forEach(backdrop => backdrop.remove());
+    
+    // Reset body styles
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+});
+
+// Update the close button click handler
+document.querySelector('[data-bs-dismiss="modal"]').addEventListener('click', function() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('farmingDataModal'));
+    if (modal) {
+        modal.hide();
+    }
+});

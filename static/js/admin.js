@@ -34,6 +34,30 @@ document.querySelectorAll('.approve-btn, .reject-btn, .suspend-btn, .unsuspend-b
     });
 });
 
+// When displaying the date in the modal
+function formatDate(dateString) {
+    try {
+        // Parse the MySQL timestamp directly without adding 'Z'
+        const date = new Date(dateString);
+        
+        // Subtract 3 hours to match local time
+        date.setHours(date.getHours() - 3);
+        
+        return date.toLocaleString('en-GB', { 
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+    } catch (error) {
+        console.error('Date formatting error:', error);
+        return dateString || 'Invalid Date';
+    }
+}
+
 // Handle View All Data button
 document.getElementById('viewAllDataBtn').addEventListener('click', async () => {
     try {
@@ -51,7 +75,7 @@ document.getElementById('viewAllDataBtn').addEventListener('click', async () => 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${row.farmer_id || 'N/A'}</td>
-                    <td>${row.date ? new Date(row.date).toLocaleString() : 'N/A'}</td>
+                    <td>${row.date ? formatDate(row.date) : 'N/A'}</td>
                     <td>${row.nitrogen || 'N/A'}</td>
                     <td>${row.phosphorus || 'N/A'}</td>
                     <td>${row.potassium || 'N/A'}</td>
