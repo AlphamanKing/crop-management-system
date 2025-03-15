@@ -6,77 +6,6 @@
     <title>CMS - Farmer Dashboard</title>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
-    <style>
-        /* Custom CSS for the button and modal */
-        #addFarmingDataBtn {
-            width: auto; /* Adjust width as needed */
-            padding: 10px 20px; /* Adjust padding for better appearance */
-        }
-
-        /* Custom CSS for the modal */
-#farmingDataModal .modal-dialog {
-    max-width: 400px; /* Adjust modal width */
-}
-
-#farmingDataModal .modal-content {
-    border-radius: 10px; /* Rounded corners */
-}
-
-#farmingDataModal .modal-header {
-    background-color: #3498db; /* Header background color */
-    color: white; /* Header text color */
-    border-radius: 10px 10px 0 0; /* Rounded top corners */
-}
-
-#farmingDataModal .modal-body {
-    padding: 20px; /* Add padding to the body */
-}
-
-#farmingDataModal .form-control {
-    border-radius: 5px; /* Rounded input fields */
-    border: 1px solid #ddd; /* Light border */
-}
-
-#farmingDataModal .form-control:focus {
-    border-color: #3498db; /* Focus border color */
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); /* Focus shadow */
-}
-
-#farmingDataModal .btn-primary {
-    background-color: #3498db; /* Primary button color */
-    border: none; /* Remove border */
-    border-radius: 5px; /* Rounded button */
-}
-
-#farmingDataModal .btn-primary:hover {
-    background-color: #2980b9; /* Hover color */
-}
-
-#farmingDataModal .btn-secondary {
-    border-radius: 5px; /* Rounded button */
-}
-
-/* Custom CSS for toast positioning */
-#successToast {
-    position: fixed; /* Fixed position */
-    top: 20px; /* Position from the top */
-    left: 50%; /* Center horizontally */
-    transform: translateX(-50%); /* Adjust for exact center */
-    z-index: 1050; /* Ensure it's above other elements */
-    min-width: 300px; /* Minimum width */
-    text-align: center; /* Center text */
-}
-
-        #farmingDataTable {
-            width: 100%; /* Ensure table uses full width */
-            table-layout: auto; /* Allow table to adjust column widths */
-        }
-
-        #farmingDataTable th, #farmingDataTable td {
-            white-space: nowrap; /* Prevent text wrapping */
-            padding: 8px; /* Adjust padding for better spacing */
-        }
-    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -160,6 +89,38 @@
         <div class="form-text">Range: 0-5000mm/year</div>
     </div>
     <div class="col-md-3">
+        <label for="moisture" class="form-label">Moisture (%)</label>
+        <input type="number" class="form-control" id="moisture" 
+               min="0" max="100" step="0.1" 
+               title="Moisture ranges from 0% to 100%"
+               required>
+        <div class="form-text">Range: 0-100%</div>
+    </div>
+    <div class="col-md-3">
+        <label for="soil_type" class="form-label">Soil Type</label>
+        <select class="form-control" id="soil_type">
+            <option value="">Select</option>
+            <option value="Clay">Clay</option>
+            <option value="Loamy">Loamy</option>
+            <option value="Red">Red</option>
+            <option value="Black">Black</option>
+            <option value="Sandy">Sandy</option>
+            <option value="Saline">Saline</option>
+            <option value="Silt">Silt</option>
+            <option value="Chalky">Chalky</option>
+            <option value="Peaty">Peaty</option>
+        </select>
+    </div>
+</div>
+                <div class="text-center mt-4">
+                    <button type="button" class="btn btn-primary" id="crop-recommend-btn">Get Crop Recommendation</button>
+                    <button type="button" class="btn btn-success ms-2" id="fertilizer-recommend-btn" disabled>Get Fertilizer Recommendation</button>
+                    <a href="/api/export-data" class="btn btn-info ms-2">Export Data</a>
+                    <button type="button" class="btn btn-warning ms-2" id="addFarmingDataBtn">Add Farming Data</button>
+                </div>
+            </form>
+        </div>
+
         <!-- Recommendations -->
         <div class="card p-4 mt-4 shadow-sm">
             <h3>Recommendations</h3>

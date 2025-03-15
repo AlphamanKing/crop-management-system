@@ -147,13 +147,60 @@ function renderChart(soilData) {
     updateChartColors();
 }
 
+// Add this function to validate input values
+function validateInput(input) {
+    const value = parseFloat(input.value);
+    const min = parseFloat(input.min);
+    const max = parseFloat(input.max);
+    
+    if (value < min || value > max) {
+        input.classList.add('is-invalid');
+        if (!input.nextElementSibling?.classList.contains('invalid-feedback')) {
+            const feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = `Please enter a value between ${min} and ${max}`;
+            input.parentNode.appendChild(feedback);
+        }
+        return false;
+    } else {
+        input.classList.remove('is-invalid');
+        const feedback = input.nextElementSibling;
+        if (feedback?.classList.contains('invalid-feedback')) {
+            feedback.remove();
+        }
+        return true;
+    }
+}
+
+// Add event listeners to all numeric inputs
+document.querySelectorAll('input[type="number"]').forEach(input => {
+    input.addEventListener('input', () => validateInput(input));
+    input.addEventListener('change', () => validateInput(input));
+});
+
 // Ensure DOM elements are loaded before adding event listeners
 document.addEventListener("DOMContentLoaded", function () {
     const cropButton = document.getElementById("crop-recommend-btn");
     const fertilizerButton = document.getElementById("fertilizer-recommend-btn");
 
     if (cropButton) {
-        cropButton.addEventListener("click", getCropRecommendation);
+        cropButton.addEventListener("click", async () => {
+            const inputs = document.querySelectorAll('#soil-form input[type="number"]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (!validateInput(input)) {
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                alert('Please correct the highlighted fields with valid values.');
+                return;
+            }
+            
+            await getCropRecommendation();
+        });
     } else {
         console.error("Crop Recommendation button not found.");
     }
