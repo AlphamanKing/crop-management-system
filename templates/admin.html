@@ -6,13 +6,40 @@
     <title>CMS - Admin Dashboard</title>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        /* Custom CSS for the button and modal */
+        #viewAllDataBtn {
+            width: auto; /* Adjust width as needed */
+            padding: 10px 20px; /* Adjust padding for better appearance */
+        }
+
+        #allDataModal .modal-dialog {
+            max-width: 90%; /* Adjust modal width */
+            margin: 1.75rem auto;
+        }
+
+        #allDataModal .modal-body {
+            max-height: 60vh; /* Adjust modal height */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        #allDataTable {
+            width: 100%; /* Ensure table uses full width */
+            table-layout: auto; /* Allow table to adjust column widths */
+        }
+
+        #allDataTable th, #allDataTable td {
+            white-space: nowrap; /* Prevent text wrapping */
+            padding: 8px; /* Adjust padding for better spacing */
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
         <div class="card p-4 shadow-sm text-center">
             <h2>Admin Dashboard</h2>
             <p class="lead">Welcome, {{ admin.username }}!</p>
-            <button class="btn btn-info mt-3" id="viewAllDataBtn">View All Soil & Recommendation Data</button>
+            <button class="btn btn-info mt-3" id="viewAllDataBtn">View All Soil and Recommendation Data</button>
         </div>
 
         <!-- Farmers Table -->

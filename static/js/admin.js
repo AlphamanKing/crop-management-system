@@ -3,13 +3,6 @@ document.querySelectorAll('.approve-btn, .reject-btn, .suspend-btn, .unsuspend-b
     button.addEventListener('click', async (e) => {
         const userId = e.target.getAttribute('data-id');
         const action = e.target.getAttribute('data-action');
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            alert('Please login first.');
-            window.location.href = '/admin/login';
-            return;
-        }
 
         if (confirm(`Are you sure you want to ${action} farmer with ID ${userId}?`)) {
             try {
@@ -17,7 +10,6 @@ document.querySelectorAll('.approve-btn, .reject-btn, .suspend-btn, .unsuspend-b
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ user_id: userId, action: action }),
                     credentials: 'include'
@@ -28,7 +20,12 @@ document.querySelectorAll('.approve-btn, .reject-btn, .suspend-btn, .unsuspend-b
                     alert(result.message);
                     window.location.reload();
                 } else {
-                    alert(`Error: ${result.error}`);
+                    if (response.status === 401) {
+                        alert('Session expired. Please login again.');
+                        window.location.href = '/admin/login';
+                    } else {
+                        alert(`Error: ${result.error}`);
+                    }
                 }
             } catch (error) {
                 alert('An error occurred. Please try again.');
@@ -39,26 +36,12 @@ document.querySelectorAll('.approve-btn, .reject-btn, .suspend-btn, .unsuspend-b
 
 // Handle View All Data button
 document.getElementById('viewAllDataBtn').addEventListener('click', async () => {
-    // Temporarily remove token check
-    // const token = localStorage.getItem('token');
-    // console.log('Token from localStorage:', token);
-    //
-    // if (!token) {
-    //     alert('Please login first.');
-    //     window.location.href = '/admin/login';
-    //     return;
-    // }
-
     try {
         const response = await fetch('/api/admin/all-data', {
             method: 'GET',
-            // headers: {
-            //     'Authorization': `Bearer ${token}`
-            // },
             credentials: 'include'
         });
         const data = await response.json();
-        console.log('Response data:', data);
 
         if (response.ok) {
             const tableBody = document.getElementById('allDataTableBody');
@@ -86,7 +69,12 @@ document.getElementById('viewAllDataBtn').addEventListener('click', async () => 
 
             new bootstrap.Modal(document.getElementById('allDataModal')).show();
         } else {
-            alert(`Error: ${data.error}`);
+            if (response.status === 401) {
+                alert('Session expired. Please login again.');
+                window.location.href = '/admin/login';
+            } else {
+                alert(`Error: ${data.error}`);
+            }
         }
     } catch (error) {
         console.error('Fetch error:', error);

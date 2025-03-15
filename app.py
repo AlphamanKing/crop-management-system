@@ -482,5 +482,170 @@ def export_data():
         as_attachment=True
     )
 
+@app.route('/api/save-farming-data', methods=['POST'])
+def save_farming_data():
+    token = request.cookies.get('token')
+    if not token:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    data = verify_token(token)
+    if not data or data.get('role') != 'farmer':
+        return jsonify({'error': 'Not authorized'}), 403
+
+    farming_data = request.get_json()
+    year = farming_data.get('year')
+    crop = farming_data.get('crop')
+    fertilizer = farming_data.get('fertilizer')
+    output = farming_data.get('output')
+
+    if not year or not crop or not fertilizer or not output:
+        return jsonify({'error': 'Missing fields'}), 400
+
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        cursor = connection.cursor()
+        query = """
+            INSERT INTO farming_data (farmer_id, year, crop, fertilizer, output)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, (data['user_id'], year, crop, fertilizer, output))
+        connection.commit()
+        return jsonify({'message': 'Farming data saved successfully'}), 200
+    except csv.Error as e:
+        print(f"Error saving farming data: {e}")
+        return jsonify({'error': 'Failed to save farming data'}), 500
+    finally:
+        cursor.close()
+        close_db_connection(connection)
+
+@app.route('/api/get-farming-data', methods=['GET'])
+def get_farming_data():
+    token = request.cookies.get('token')
+    if not token:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    data = verify_token(token)
+    if not data or data.get('role') != 'farmer':
+        return jsonify({'error': 'Not authorized'}), 403
+
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        cursor = connection.cursor(dictionary=True)
+        query = "SELECT id, year, crop, fertilizer, output FROM farming_data WHERE farmer_id = %s ORDER BY year DESC"
+        cursor.execute(query, (data['user_id'],))
+        farming_data = cursor.fetchall()
+        return jsonify(farming_data)
+    except Exception as e:
+        print(f"Error fetching farming data: {e}")
+        return jsonify({'error': 'Failed to fetch farming data'}), 500
+    finally:
+        cursor.close()
+        close_db_connection(connection)
+
+@app.route('/api/get-farming-data/<int:record_id>', methods=['GET'])
+def get_farming_data_by_id(record_id):
+    token = request.cookies.get('token')
+    if not token:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    data = verify_token(token)
+    if not data or data.get('role') != 'farmer':
+        return jsonify({'error': 'Not authorized'}), 403
+
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        cursor = connection.cursor(dictionary=True)
+        query = "SELECT * FROM farming_data WHERE id = %s AND farmer_id = %s"
+        cursor.execute(query, (record_id, data['user_id']))
+        farming_data = cursor.fetchone()
+        if farming_data:
+            print(f"Fetched farming data for record ID {record_id}: {farming_data}")  # Debugging
+            return jsonify(farming_data)
+        else:
+            print(f"Record ID {record_id} not found for farmer ID {data['user_id']}")  # Debugging
+            return jsonify({'error': 'Record not found'}), 404
+    except csv.Error as e:
+        print(f"Error fetching farming data: {e}")
+        return jsonify({'error': 'Failed to fetch farming data'}), 500
+    finally:
+        cursor.close()
+        close_db_connection(connection)
+
+@app.route('/api/update-farming-data/<int:record_id>', methods=['PUT'])
+def update_farming_data(record_id):
+    token = request.cookies.get('token')
+    if not token:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    data = verify_token(token)
+    if not data or data.get('role') != 'farmer':
+        return jsonify({'error': 'Not authorized'}), 403
+
+    farming_data = request.get_json()
+    year = farming_data.get('year')
+    crop = farming_data.get('crop')
+    fertilizer = farming_data.get('fertilizer')
+    output = farming_data.get('output')
+
+    if not year or not crop or not fertilizer or not output:
+        return jsonify({'error': 'Missing fields'}), 400
+
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        cursor = connection.cursor()
+        query = """
+            UPDATE farming_data
+            SET year = %s, crop = %s, fertilizer = %s, output = %s
+            WHERE id = %s AND farmer_id = %s
+        """
+        cursor.execute(query, (year, crop, fertilizer, output, record_id, data['user_id']))
+        connection.commit()
+        return jsonify({'message': 'Farming data updated successfully'}), 200
+    except csv.Error as e:
+        print(f"Error updating farming data: {e}")
+        return jsonify({'error': 'Failed to update farming data'}), 500
+    finally:
+        cursor.close()
+        close_db_connection(connection)
+
+@app.route('/api/delete-farming-data/<int:record_id>', methods=['DELETE'])
+def delete_farming_data(record_id):
+    token = request.cookies.get('token')
+    if not token:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    data = verify_token(token)
+    if not data or data.get('role') != 'farmer':
+        return jsonify({'error': 'Not authorized'}), 403
+
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        cursor = connection.cursor()
+        query = "DELETE FROM farming_data WHERE id = %s AND farmer_id = %s"
+        cursor.execute(query, (record_id, data['user_id']))
+        connection.commit()
+        return jsonify({'message': 'Farming data deleted successfully'}), 200
+    except csv.Error as e:
+        print(f"Error deleting farming data: {e}")
+        return jsonify({'error': 'Failed to delete farming data'}), 500
+    finally:
+        cursor.close()
+        close_db_connection(connection)
+
 if __name__ == '__main__':
     app.run(debug=True)
