@@ -491,6 +491,7 @@ def export_data():
         # Add space between tables
         writer.writerow([])
         writer.writerow([])
+        writer.writerow([])
 
         # Write Farming Data table
         writer.writerow(['FARMING OUTPUT DATA'])
