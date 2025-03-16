@@ -1,0 +1,45 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+import joblib
+
+# Load dataset
+file_path = "f2.csv"  # Ensure you uploaded f2.csv
+df = pd.read_csv(file_path)
+
+# Display basic info
+print("Dataset Sample:\n", df.head())
+print("\nColumn Names:", df.columns)
+
+# Convert categorical variables to numerical
+label_encoders = {}
+for col in ['Soil_Type', 'Crop_Type', 'Fertilizer']:  # Target 'Fertilizer' also needs encoding
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    label_encoders[col] = le  # Store encoders for later use
+
+# Split features (X) and target (y)
+X = df.drop(columns=['Fertilizer'])  # Features
+y = df['Fertilizer']  # Target
+
+# Train-test split (80-20 ratio)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Save preprocessed data
+X_train.to_csv("X_train.csv", index=False)
+X_test.to_csv("X_test.csv", index=False)
+y_train.to_csv("y_train.csv", index=False)
+y_test.to_csv("y_test.csv", index=False)
+
+# Save Label Encoders
+joblib.dump(label_encoders, "label_encoders.joblib")
+
+print("\n✅ Preprocessing Complete! Data saved in Colab.")
+
+# OPTIONAL: Download processed files to your local machine
+from google.colab import files
+files.download("X_train.csv")
+files.download("X_test.csv")
+files.download("y_train.csv")
+files.download("y_test.csv")
+files.download("label_encoders.joblib")

@@ -1,0 +1,27 @@
+import pandas as pd
+import joblib
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Load preprocessed data
+X_train = pd.read_csv("X_train.csv")
+X_test = pd.read_csv("X_test.csv")
+y_train = pd.read_csv("y_train.csv").values.ravel()  # Convert to 1D array
+y_test = pd.read_csv("y_test.csv").values.ravel()
+
+# Train Random Forest Model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Evaluate the model
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f"\n✅ Model Training Complete! Accuracy: {accuracy:.4f}")
+
+# Save the trained model using joblib
+joblib.dump(model, "fertilizer_recommendation_model.joblib")
+print("\n📁 Model saved as 'fertilizer_recommendation_model.joblib'")
+
+# OPTIONAL: Download the model file to your PC
+from google.colab import files
+files.download("fertilizer_recommendation_model.joblib")
