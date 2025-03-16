@@ -176,6 +176,9 @@ document.getElementById('addFarmingDataBtn').addEventListener('click', () => {
     // Reset form
     document.getElementById('farmingDataForm').reset();
     
+    // Reset modal title to "Add Farming Data"
+    document.getElementById('farmingDataModalLabel').textContent = 'Add Farming Data';
+    
     // Reset save button to default state
     const saveButton = document.getElementById('saveFarmingDataBtn');
     saveButton.textContent = 'Save Data';
@@ -321,6 +324,9 @@ async function editFarmingData(recordId) {
         const data = await response.json();
 
         if (response.ok) {
+            // Update modal title to "Edit Farming Data"
+            document.getElementById('farmingDataModalLabel').textContent = 'Edit Farming Data';
+            
             // Reset and populate form
             document.getElementById('farmingDataForm').reset();
             document.getElementById('year').value = data.year;
