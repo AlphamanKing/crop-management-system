@@ -4,3 +4,4 @@ env-py310/
 .env
 *.log
 .vscode/
+config.py

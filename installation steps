@@ -1,0 +1,117 @@
+1. PREREQUISITES
+- python 3.10
+- MySQL Server
+- Git
+
+2. Clone/Download the Project
+-git clone <repository-url> cms
+ # or copy the project files to d:\cms
+
+3. Create Virtual Environment
+-python -m venv venv
+ venv\Scripts\activate
+
+4. Install Dependencies
+-pip install -r requirements.txt
+
+5. Setup Database
+
+-- Create database
+CREATE DATABASE IF NOT EXISTS cms;
+USE cms;
+
+-- Create admins table
+CREATE TABLE admins (
+    id INT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
+
+-- Create farmers table
+CREATE TABLE farmers (
+    id INT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    is_approved TINYINT(1) DEFAULT 0,
+    is_suspended TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
+
+-- Create farming_data table
+CREATE TABLE farming_data (
+    id INT NOT NULL AUTO_INCREMENT,
+    farmer_id INT NOT NULL,
+    year INT NOT NULL,
+    crop VARCHAR(255) NOT NULL,
+    fertilizer VARCHAR(255) NOT NULL,
+    output DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (farmer_id) REFERENCES farmers(id)
+);
+
+-- Create recommendations table
+CREATE TABLE recommendations (
+    id INT NOT NULL AUTO_INCREMENT,
+    farmer_id INT NOT NULL,
+    crop VARCHAR(255) NOT NULL,
+    fertilizer VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (farmer_id) REFERENCES farmers(id)
+);
+
+-- Create soil_data table
+CREATE TABLE soil_data (
+    id INT NOT NULL AUTO_INCREMENT,
+    farmer_id INT NOT NULL,
+    nitrogen FLOAT NOT NULL,
+    phosphorus FLOAT NOT NULL,
+    potassium FLOAT NOT NULL,
+    temperature FLOAT NOT NULL,
+    humidity FLOAT NOT NULL,
+    ph FLOAT NOT NULL,
+    rainfall FLOAT NOT NULL,
+    moisture FLOAT,
+    soil_type VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (farmer_id) REFERENCES farmers(id)
+);
+
+-- Create default admin user (password should be hashed in production)
+INSERT INTO admins (username, password) 
+VALUES ('admin', '$2b$12$LQvKUcr6Y7VsYZMUvH1sWOeV0UobwY8bHKhqD0InbxN2dyKH9i/R2');
+-- Default password is 'admin123' - change this in production!
+
+
+6. Configure Application
+- create new config.py file
+- Copy config.example.py contents to config.p
+- Edit config.py with your actual database credentials and secret keys
+
+7. Start the Application
+- python app.py
+
+8. Verify Installation
+- Open http://localhost:5000 in browser
+- Try logging in with created admin credentials
+- Test soil data input and recommendations
+- Verify chart rendering
+- Test farming data CRUD operations
+
+9. Common Issues & Solutions
+- If database connection fails:
+ Verify MySQL is running
+ Check credentials in .env
+ Ensure MySQL user has proper permissions
+- If charts don't render:
+ Verify chart.umd.js is in correct location
+ Check browser console for errors
+- If ML models fail:
+ Verify model files exist in models
+ Check Python package versions match requirements
