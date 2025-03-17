@@ -1,11 +1,10 @@
 1. PREREQUISITES
-- python 3.10
+- python 3.10.9
 - MySQL Server
 - Git
 
 2. Clone/Download the Project
--git clone <repository-url> cms
- # or copy the project files to d:\cms
+- git clone <https://github.com/AlphamanKing/crop-management-system> cms
 
 3. Create Virtual Environment
 -python -m venv venv

@@ -20,31 +20,7 @@ The AI-Powered Crop Management System (CMS) is a web application designed to ass
 - **Deployment**: AWS (EC2, RDS, S3)
 
 ## Project Structure
-cms/
-├── static/                  # Static assets for frontend
-│   ├── css/
-│   │   └── styles.css       # Custom CSS
-│   ├── js/
-│   │   ├── auth.js         # Authentication logic
-│   │   ├── soil.js         # Soil input and recommendation logic
-│   │   ├── charts.js       # Visualization logic
-│   │   └── admin.js        # Admin dashboard logic
-│   └── bootstrap/          # Bootstrap files (if not using CDN)
-├── templates/               # HTML templates for Flask
-│   ├── index.html          # Homepage
-│   ├── login.html          # Farmer login page
-│   ├── register.html       # Farmer registration page
-│   ├── dashboard.html      # Farmer dashboard
-│   └── admin.html          # Admin dashboard
-├── models/                  # Pre-trained model files
-│   ├── crop_model.joblib    # Crop recommendation model
-│   └── fertilizer_model.joblib  # Fertilizer recommendation model
-├── app.py                   # Main Flask application
-├── config.py                # Configuration (DB credentials, JWT secret)
-├── database.py              # MySQL connection and queries
-├── requirements.txt         # Python dependencies
-└── README.md                # Project documentation
-
+![Project directory structure showing the main folders: static (containing css, js, and bootstrap), templates (containing html files), models (containing ML models), and root files (app.py, config.py, requirements.txt)](image.png)
 
 ## Prerequisites
 - **Python 3.8+**: Ensure Python is installed.
