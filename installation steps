@@ -60,9 +60,12 @@ CREATE TABLE recommendations (
     crop VARCHAR(255) NOT NULL,
     fertilizer VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    soil_data_id INT,
     PRIMARY KEY (id),
-    FOREIGN KEY (farmer_id) REFERENCES farmers(id)
+    FOREIGN KEY (farmer_id) REFERENCES farmers(id),
+    FOREIGN KEY (soil_data_id) REFERENCES soil_data(id)
 );
+
 
 -- Create soil_data table
 CREATE TABLE soil_data (
