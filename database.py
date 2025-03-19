@@ -187,7 +187,7 @@ def get_all_farmers():
 def save_soil_data(farmer_id, nitrogen, phosphorus, potassium, temperature, humidity, ph, rainfall, moisture=None, soil_type=None):
     connection = get_db_connection()
     if not connection:
-        return False
+        return False, None
 
     try:
         cursor = connection.cursor()
@@ -196,11 +196,12 @@ def save_soil_data(farmer_id, nitrogen, phosphorus, potassium, temperature, humi
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(query, (farmer_id, nitrogen, phosphorus, potassium, temperature, humidity, ph, rainfall, moisture, soil_type))
+        soil_data_id = cursor.lastrowid
         connection.commit()
-        return True
+        return True, soil_data_id
     except Error as e:
         print(f"Error saving soil data: {e}")
-        return False
+        return False, None
     finally:
         cursor.close()
         close_db_connection(connection)
@@ -241,7 +242,7 @@ def get_soil_history(farmer_id):
         cursor.close()
         close_db_connection(connection)
 
-def save_recommendation(farmer_id, crop, fertilizer):
+def save_recommendation(farmer_id, crop, fertilizer, soil_data_id=None):
     connection = get_db_connection()
     if not connection:
         return False
@@ -249,10 +250,10 @@ def save_recommendation(farmer_id, crop, fertilizer):
     try:
         cursor = connection.cursor()
         query = """
-            INSERT INTO recommendations (farmer_id, crop, fertilizer, created_at)
-            VALUES (%s, %s, %s, NOW())
+            INSERT INTO recommendations (farmer_id, crop, fertilizer, soil_data_id, created_at)
+            VALUES (%s, %s, %s, %s, NOW())
         """
-        cursor.execute(query, (farmer_id, crop, fertilizer))
+        cursor.execute(query, (farmer_id, crop, fertilizer, soil_data_id))
         connection.commit()
         return True
     except Error as e:
@@ -287,18 +288,49 @@ def get_paired_history(farmer_id):
 
     cursor = None
     try:
-        cursor = connection.cursor(dictionary=True)  # Changed from mysql.cursors.DictCursor
-        query = """
-            SELECT 
-                s.created_at AS date,
-                s.nitrogen, s.phosphorus, s.potassium, s.temperature, s.humidity, s.ph, s.rainfall, s.moisture, s.soil_type,
-                r.crop, r.fertilizer
-            FROM soil_data s
-            LEFT JOIN recommendations r ON s.farmer_id = r.farmer_id 
-                AND s.created_at = r.created_at
-            WHERE s.farmer_id = %s
-            ORDER BY s.created_at DESC
+        cursor = connection.cursor(dictionary=True)
+        # First check if we have soil_data_id in the recommendations table
+        check_query = """
+            SELECT COUNT(*) as count FROM information_schema.columns 
+            WHERE table_name = 'recommendations' AND column_name = 'soil_data_id'
         """
+        cursor.execute(check_query)
+        has_soil_data_id = cursor.fetchone()['count'] > 0
+        
+        if has_soil_data_id:
+            # Use direct soil_data_id reference if available
+            query = """
+                SELECT 
+                    s.created_at AS date,
+                    s.nitrogen, s.phosphorus, s.potassium, s.temperature, s.humidity, s.ph, s.rainfall, s.moisture, s.soil_type,
+                    r.crop, r.fertilizer
+                FROM soil_data s
+                LEFT JOIN recommendations r ON s.id = r.soil_data_id
+                WHERE s.farmer_id = %s
+                ORDER BY s.created_at DESC
+            """
+        else:
+            # Fall back to date-based join for compatibility with existing data
+            query = """
+                SELECT 
+                    s.created_at AS date,
+                    s.nitrogen, s.phosphorus, s.potassium, s.temperature, s.humidity, s.ph, s.rainfall, s.moisture, s.soil_type,
+                    r.crop, r.fertilizer
+                FROM soil_data s
+                LEFT JOIN (
+                    SELECT 
+                        farmer_id,
+                        DATE(created_at) as created_date,
+                        crop, 
+                        fertilizer,
+                        created_at
+                    FROM recommendations
+                ) r ON s.farmer_id = r.farmer_id 
+                    AND DATE(s.created_at) = r.created_date
+                WHERE s.farmer_id = %s
+                ORDER BY s.created_at DESC
+            """
+        
         cursor.execute(query, (farmer_id,))
         results = cursor.fetchall()
         return results

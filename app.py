@@ -216,7 +216,7 @@ def soil_input():
         input_data[field] = input_data.get(field, default)
 
     # Save soil data
-    if save_soil_data(
+    success, soil_data_id = save_soil_data(
         user_id,
         input_data['nitrogen'],
         input_data['phosphorus'],
@@ -227,12 +227,14 @@ def soil_input():
         input_data['rainfall'],
         input_data['moisture'],
         input_data['soil_type']
-    ):
+    )
+    
+    if success:
         # Get crop recommendation using the helper function
         crop = get_crop_recommendation(input_data)
         
         # Save only the crop recommendation (fertilizer will be saved later)
-        save_recommendation(user_id, crop, None)  # Set fertilizer as None initially
+        save_recommendation(user_id, crop, None, soil_data_id)  # Pass soil_data_id to link records
         
         alert_message = check_soil_alerts(input_data)
         return jsonify({
@@ -270,7 +272,7 @@ def save_fertilizer_recommendation_endpoint():
         cursor = connection.cursor()
         # Find the latest recommendation entry for this user
         query = """
-            SELECT id FROM recommendations 
+            SELECT id, soil_data_id FROM recommendations 
             WHERE farmer_id = %s AND fertilizer IS NULL 
             ORDER BY created_at DESC LIMIT 1
         """
@@ -288,7 +290,18 @@ def save_fertilizer_recommendation_endpoint():
             cursor.execute(update_query, (fertilizer, recommendation_id))
         else:
             # If no entry exists (unlikely since /api/soil-input creates one), create a new one
-            save_recommendation(user_id, crop, fertilizer)
+            # Get the latest soil_data for this user
+            soil_query = """
+                SELECT id FROM soil_data
+                WHERE farmer_id = %s
+                ORDER BY created_at DESC LIMIT 1
+            """
+            cursor.execute(soil_query, (user_id,))
+            soil_result = cursor.fetchone()
+            soil_data_id = soil_result[0] if soil_result else None
+            
+            # Save recommendation with soil_data_id
+            save_recommendation(user_id, crop, fertilizer, soil_data_id)
 
         connection.commit()
         return jsonify({'message': 'Fertilizer recommendation saved successfully'}), 200
