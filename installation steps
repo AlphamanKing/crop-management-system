@@ -82,16 +82,12 @@ CREATE TABLE soil_data (
     FOREIGN KEY (farmer_id) REFERENCES farmers(id)
 );
 
--- Create default admin user (password should be hashed in production)
-INSERT INTO admins (username, password) 
-VALUES ('admin', '$2b$12$LQvKUcr6Y7VsYZMUvH1sWOeV0UobwY8bHKhqD0InbxN2dyKH9i/R2');
--- Default password is 'admin123' - change this in production!
-
 
 6. Configure Application
 - create new config.py file
 - Copy config.example.py contents to config.p
 - Edit config.py with your actual database credentials and secret keys
+-run reset_admin.py script with your desired admin credentials, in order to create a new admin user
 
 7. Start the Application
 - python app.py

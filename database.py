@@ -36,8 +36,8 @@ def create_user(username, email, password):
     try:
         cursor = connection.cursor()
         query = """
-            INSERT INTO farmers (username, email, password)
-            VALUES (%s, %s, %s)
+            INSERT INTO farmers (username, email, password, is_approved)
+            VALUES (%s, %s, %s, 1)
         """
         cursor.execute(query, (username, email, hashed_password))
         connection.commit()
@@ -308,4 +308,48 @@ def get_paired_history(farmer_id):
     finally:
         if cursor:
             cursor.close()
+        close_db_connection(connection)
+
+def create_admin(username, password):
+    hashed_password = hash_password(password)
+    connection = get_db_connection()
+    if not connection:
+        return False
+
+    try:
+        cursor = connection.cursor()
+        query = """
+            INSERT INTO admins (username, password)
+            VALUES (%s, %s)
+        """
+        cursor.execute(query, (username, hashed_password))
+        connection.commit()
+        return True
+    except Error as e:
+        print(f"Error creating admin: {e}")
+        return False
+    finally:
+        cursor.close()
+        close_db_connection(connection)
+
+def update_admin_password(username, new_password):
+    hashed_password = hash_password(new_password)
+    connection = get_db_connection()
+    if not connection:
+        return False
+
+    try:
+        cursor = connection.cursor()
+        query = """
+            UPDATE admins SET password = %s
+            WHERE username = %s
+        """
+        cursor.execute(query, (hashed_password, username))
+        connection.commit()
+        return True
+    except Error as e:
+        print(f"Error updating admin password: {e}")
+        return False
+    finally:
+        cursor.close()
         close_db_connection(connection)

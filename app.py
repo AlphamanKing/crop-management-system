@@ -59,7 +59,7 @@ def register():
         return jsonify({'error': 'Email already registered'}), 409
 
     if create_user(username, email, password):
-        return jsonify({'message': 'Registration successful. Awaiting admin approval.'}), 201
+        return jsonify({'message': 'Registration successful. You can now log in.'}), 201
     else:
         return jsonify({'error': 'Registration failed'}), 500
 
@@ -82,9 +82,6 @@ def login():
 
     if user['is_suspended']:
         return jsonify({'error': 'Account is suspended'}), 403
-
-    if not user['is_approved']:
-        return jsonify({'error': 'Account not approved by admin'}), 403
 
     token = jwt.encode({
         'user_id': user['id'],
